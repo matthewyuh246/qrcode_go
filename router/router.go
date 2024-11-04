@@ -23,8 +23,8 @@ func NewRouter(uc controller.IUserController, qc controller.IQRCodeController) *
 		CookiePath:     "/",
 		CookieDomain:   os.Getenv("API_DOMAIN"),
 		CookieHTTPOnly: true,
-		CookieSameSite: http.SameSiteNoneMode,
-		//CookieSameSite: http.SameSiteDefaultMode,
+		// CookieSameSite: http.SameSiteNoneMode,
+		CookieSameSite: http.SameSiteDefaultMode,
 	}))
 	e.POST("/signup", uc.SignUp)
 	e.POST("/login", uc.LogIn)
@@ -37,6 +37,7 @@ func NewRouter(uc controller.IUserController, qc controller.IQRCodeController) *
 	}))
 	t.POST("/generate", qc.GenerateQRCode)
 	t.GET("/recent", qc.GetRecentQRCodes)
+	t.GET("/favorite", qc.GetFavoriteQRCodes)
 
 	return e
 }

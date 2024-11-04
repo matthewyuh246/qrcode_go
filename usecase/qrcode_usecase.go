@@ -7,9 +7,10 @@ import (
 )
 
 type IQRCodeUsecase interface {
-	GenerateQRCode(text string) (*model.QRCode, error)
+	GenerateQRCode(text string, title string, is_favorite bool) (*model.QRCode, error)
 	SaveQRCode(qrCode *model.QRCode) error
 	GetRecentQRCodes(limit int, userId uint) ([]model.QRCode, error)
+	GetFavoriteQRCodes(limit int, userId uint) ([]model.QRCode, error)
 }
 
 type qrcodeUsecase struct {
@@ -20,8 +21,8 @@ func NewQRCodeUsecase(qr repository.IQRCodeRepository) IQRCodeUsecase {
 	return &qrcodeUsecase{qr}
 }
 
-func (qu *qrcodeUsecase) GenerateQRCode(text string) (*model.QRCode, error) {
-	qr, err := qrcode.New(text, qrcode.Medium)
+func (qu *qrcodeUsecase) GenerateQRCode(text string, title string, is_favorite bool) (*model.QRCode, error) {
+	qr, err := qrcode.New(text, qrcode.High)
 	if err != nil {
 		return nil, err
 	}
@@ -32,8 +33,10 @@ func (qu *qrcodeUsecase) GenerateQRCode(text string) (*model.QRCode, error) {
 	}
 
 	return &model.QRCode{
-		Text:  text,
-		Image: data,
+		Text:       text,
+		Title:      title,
+		IsFavorite: is_favorite,
+		Image:      data,
 	}, nil
 }
 
@@ -43,4 +46,8 @@ func (qu *qrcodeUsecase) SaveQRCode(qrCode *model.QRCode) error {
 
 func (qu *qrcodeUsecase) GetRecentQRCodes(limit int, userId uint) ([]model.QRCode, error) {
 	return qu.qr.FindRecent(limit, userId)
+}
+
+func (qu *qrcodeUsecase) GetFavoriteQRCodes(limit int, userId uint) ([]model.QRCode, error) {
+	return qu.qr.FindFavorite(limit, userId)
 }

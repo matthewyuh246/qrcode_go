@@ -8,6 +8,7 @@ import (
 type IQRCodeRepository interface {
 	Save(qrCode *model.QRCode) error
 	FindRecent(limit int, userId uint) ([]model.QRCode, error)
+	FindFavorite(limit int, userId uint) ([]model.QRCode, error)
 }
 
 type qrcodeRepository struct {
@@ -27,7 +28,15 @@ func (qr *qrcodeRepository) Save(qrCode *model.QRCode) error {
 
 func (qr *qrcodeRepository) FindRecent(limit int, userId uint) ([]model.QRCode, error) {
 	var qrCodes []model.QRCode
-	if err := qr.db.Joins("User").Where("user_id=?, userId").Order("is desc").Limit(limit).Find(&qrCodes).Error; err != nil {
+	if err := qr.db.Joins("User").Where("user_id=?", userId).Order("created_at desc").Limit(limit).Find(&qrCodes).Error; err != nil {
+		return nil, err
+	}
+	return qrCodes, nil
+}
+
+func (qr *qrcodeRepository) FindFavorite(limit int, userId uint) ([]model.QRCode, error) {
+	var qrCodes []model.QRCode
+	if err := qr.db.Joins("User").Where("user_id=?", userId).Where("is_favorite = ?", true).Order("created_at desc").Limit(limit).Find(&qrCodes).Error; err != nil {
 		return nil, err
 	}
 	return qrCodes, nil
